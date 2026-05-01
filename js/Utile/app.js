@@ -1,5 +1,4 @@
 // ===== Utile/app.js — Orchestrateur principal =====
-// C'est ici que tous les modules sont importés et que les événements sont branchés.
 
 import {
   btnNouvelEtudiant, btnFermerForm, btnAnnulerForm, btnSauvegarder,
@@ -12,11 +11,11 @@ import {
 
 import { etudiants, corbeille } from "../Stores/taskStores.js";
 
-import {
-  ajouterEtudiant, modifierEtudiant,
-  restaurerEtudiant, supprimerDefinitivement,
-  emailExiste, filtrerEtudiants
-} from "../Services/taskService.js";
+// ✅ Chaque fonctionnalité vient de son propre fichier
+import { ajouterEtudiant } from "../Services/ajouter.js";
+import { supprimerEtudiant, supprimerDefinitivement } from "../Services/supprimer.js";
+import { modifierEtudiant, emailExiste, filtrerEtudiants } from "../Services/taskService.js";
+import { restaurerEtudiant } from "../Services/taskService.js";
 
 import { afficherTableau } from "../UI/tasksRenderer.js";
 import { afficherCorbeille, getIdsCoches, mettreAJourActionsDrawer } from "../UI/statsRenderer.js";
@@ -41,37 +40,20 @@ function soumettreFormulaire() {
 
   let valide = true;
 
-  if (nom === "") {
-    errNom.textContent = "Le nom est obligatoire.";
-    valide = false;
-  }
-
-  if (prenom === "") {
-    errPrenom.textContent = "Le prénom est obligatoire.";
-    valide = false;
-  }
+  if (nom === "") { errNom.textContent = "Le nom est obligatoire."; valide = false; }
+  if (prenom === "") { errPrenom.textContent = "Le prénom est obligatoire."; valide = false; }
 
   let regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (email === "") {
-    errEmail.textContent = "L'email est obligatoire.";
-    valide = false;
+    errEmail.textContent = "L'email est obligatoire."; valide = false;
   } else if (!regexEmail.test(email)) {
-    errEmail.textContent = "Format d'email invalide.";
-    valide = false;
+    errEmail.textContent = "Format d'email invalide."; valide = false;
   } else if (emailExiste(email, id)) {
-    errEmail.textContent = "Cet email est déjà utilisé.";
-    valide = false;
+    errEmail.textContent = "Cet email est déjà utilisé."; valide = false;
   }
 
-  if (telephone === "") {
-    errTel.textContent = "Le téléphone est obligatoire.";
-    valide = false;
-  }
-
-  if (role === "") {
-    errRole.textContent = "Veuillez choisir une formation.";
-    valide = false;
-  }
+  if (telephone === "") { errTel.textContent = "Le téléphone est obligatoire."; valide = false; }
+  if (role === "") { errRole.textContent = "Veuillez choisir une formation."; valide = false; }
 
   if (!valide) return;
 
@@ -90,99 +72,39 @@ function soumettreFormulaire() {
   }
 }
 
-// ===== DRAWER : RESTAURER LES COCHÉS (après confirmation) =====
+// ===== DRAWER : RESTAURER LES COCHÉS =====
 function restaurerSelectionnes() {
   let ids = getIdsCoches();
   if (ids.length === 0) return;
-  for (let i = 0; i < ids.length; i++) {
-    restaurerEtudiant(ids[i]);
-  }
+  for (let i = 0; i < ids.length; i++) { restaurerEtudiant(ids[i]); }
   confirmBox.style.display = "none";
   afficherTableau(etudiants);
   afficherCorbeille();
   afficherToast("↩ Étudiant(s) restauré(s) avec succès !");
 }
 
-// ===== DRAWER : COCHER / DÉCOCHER TOUT =====
+// ===== COCHER / DÉCOCHER TOUT =====
 function toggleTousCheckboxes() {
   let etatGlobal = checkAll.checked;
   let checks = document.querySelectorAll(".check-restore");
-  for (let i = 0; i < checks.length; i++) {
-    checks[i].checked = etatGlobal;
-  }
+  for (let i = 0; i < checks.length; i++) { checks[i].checked = etatGlobal; }
   mettreAJourActionsDrawer();
 }
 
-// ===== INITIALISATION AU CHARGEMENT DE LA PAGE =====
+// ===== INITIALISATION =====
 document.addEventListener("DOMContentLoaded", function () {
-
-  // Affichage initial du tableau
   afficherTableau(etudiants);
-
-  // Nouveau étudiant → ouvrir popup vide
-  btnNouvelEtudiant.addEventListener("click", function () {
-    ouvrirFormulaireAjout();
-  });
-
-  // Fermer / annuler le popup formulaire
-  btnFermerForm.addEventListener("click", function () {
-    fermerOverlay("overlayForm");
-  });
-
-  btnAnnulerForm.addEventListener("click", function () {
-    fermerOverlay("overlayForm");
-  });
-
-  // Enregistrer (ajout ou modif)
-  btnSauvegarder.addEventListener("click", function () {
-    soumettreFormulaire();
-  });
-
-  // Ouvrir le drawer corbeille
-  btnOuvrirRestore.addEventListener("click", function () {
-    afficherCorbeille();
-    checkAll.checked = false;
-    ouvrirOverlay("overlayRestore");
-  });
-
-  // Fermer le drawer
-  btnFermerRestore.addEventListener("click", function () {
-    fermerOverlay("overlayRestore");
-  });
-
-  // Cocher / décocher tout
-  checkAll.addEventListener("change", function () {
-    toggleTousCheckboxes();
-  });
-
-  // Clic sur "Désarchiver" → afficher la boîte de confirmation
-  btnDesarchiver.addEventListener("click", function () {
-    confirmBox.style.display = "block";
-  });
-
-  // Confirmation : "Restaurer"
-  btnConfirmRestaurer.addEventListener("click", function () {
-    restaurerSelectionnes();
-  });
-
-  // Confirmation : "Annuler" → juste cacher la boîte
-  btnConfirmAnnuler.addEventListener("click", function () {
-    confirmBox.style.display = "none";
-  });
-
-  // Recherche en temps réel
-  searchInput.addEventListener("input", function () {
-    let resultats = filtrerEtudiants(this.value);
-    afficherTableau(resultats);
-  });
-
-  // Fermer les overlays en cliquant en dehors
-  overlayForm.addEventListener("click", function (e) {
-    if (e.target === this) fermerOverlay("overlayForm");
-  });
-
-  overlayRestore.addEventListener("click", function (e) {
-    if (e.target === this) fermerOverlay("overlayRestore");
-  });
-
+  btnNouvelEtudiant.addEventListener("click", () => ouvrirFormulaireAjout());
+  btnFermerForm.addEventListener("click", () => fermerOverlay("overlayForm"));
+  btnAnnulerForm.addEventListener("click", () => fermerOverlay("overlayForm"));
+  btnSauvegarder.addEventListener("click", () => soumettreFormulaire());
+  btnOuvrirRestore.addEventListener("click", () => { afficherCorbeille(); checkAll.checked = false; ouvrirOverlay("overlayRestore"); });
+  btnFermerRestore.addEventListener("click", () => fermerOverlay("overlayRestore"));
+  checkAll.addEventListener("change", () => toggleTousCheckboxes());
+  btnDesarchiver.addEventListener("click", () => { confirmBox.style.display = "block"; });
+  btnConfirmRestaurer.addEventListener("click", () => restaurerSelectionnes());
+  btnConfirmAnnuler.addEventListener("click", () => { confirmBox.style.display = "none"; });
+  searchInput.addEventListener("input", function () { afficherTableau(filtrerEtudiants(this.value)); });
+  overlayForm.addEventListener("click", (e) => { if (e.target === overlayForm) fermerOverlay("overlayForm"); });
+  overlayRestore.addEventListener("click", (e) => { if (e.target === overlayRestore) fermerOverlay("overlayRestore"); });
 });

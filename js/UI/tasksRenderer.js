@@ -1,12 +1,12 @@
-// ===== UI/tasksRenderer.js — Rendu du tableau principal des étudiants =====
+// ===== UI/tasksRenderer.js — Rendu du tableau principal =====
 
 import { tableBody } from "../DOM/element.js";
-import { supprimerEtudiant } from "../Services/taskService.js";
+// ✅ supprimerEtudiant vient de son propre fichier (feature/supprimer)
+import { supprimerEtudiant } from "../Services/supprimer.js";
 import { etudiants } from "../Stores/taskStores.js";
 import { afficherToast } from "./messageRenderer.js";
 import { ouvrirFormulaireModif } from "./modalRenderer.js";
 
-// Afficher le tableau des étudiants actifs
 export function afficherTableau(liste) {
   tableBody.innerHTML = "";
 
@@ -22,7 +22,6 @@ export function afficherTableau(liste) {
     let e = liste[i];
     let tr = document.createElement("tr");
     tr.setAttribute("data-id", e.id);
-
     tr.innerHTML =
       "<td>" + e.id + "</td>" +
       "<td>" + e.nom + "</td>" +
@@ -35,16 +34,13 @@ export function afficherTableau(liste) {
         "<button class='btn-del' data-id='" + e.id + "' title='Supprimer'>🗑</button>" +
         "<button class='btn-edit' data-id='" + e.id + "' title='Modifier'>✏</button>" +
       "</td>";
-
     tableBody.appendChild(tr);
   }
-
-  // Attacher les listeners après rendu
   attacherBoutonsTableau();
 }
 
-// Attacher les boutons supprimer et modifier du tableau
 export function attacherBoutonsTableau() {
+  // ✅ Bouton supprimer → utilise supprimerEtudiant de supprimer.js
   let btnsSup = tableBody.querySelectorAll(".btn-del");
   for (let i = 0; i < btnsSup.length; i++) {
     btnsSup[i].addEventListener("click", function () {
