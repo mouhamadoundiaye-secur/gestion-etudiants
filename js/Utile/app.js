@@ -9,17 +9,18 @@ import {
   errNom, errPrenom, errEmail, errTel, errRole
 } from "../DOM/element.js";
 
-import { etudiants, corbeille } from "../Stores/taskStores.js";
+import { etudiants } from "../Stores/taskStores.js";
 
-import { ajouterEtudiant } from "../Services/ajouter.js";
-import { supprimerEtudiant } from "../Services/supprimer.js";
-// ✅ modifierEtudiant et emailExiste viennent de modifier.js
+import { ajouterEtudiant }           from "../Services/ajouter.js";
+import { supprimerEtudiant }         from "../Services/supprimer.js";
 import { modifierEtudiant, emailExiste } from "../Services/modifier.js";
-import { restaurerEtudiant, filtrerEtudiants } from "../Services/taskService.js";
+import { filtrerEtudiants }          from "../Services/filtre.js";
+// ✅ restaurerEtudiant vient de son propre fichier (feature/restaurer)
+import { restaurerEtudiant }         from "../Services/restaurer.js";
 
-import { afficherTableau } from "../UI/tasksRenderer.js";
+import { afficherTableau }           from "../UI/tasksRenderer.js";
 import { afficherCorbeille, getIdsCoches, mettreAJourActionsDrawer } from "../UI/statsRenderer.js";
-import { afficherToast } from "../UI/messageRenderer.js";
+import { afficherToast }             from "../UI/messageRenderer.js";
 import {
   ouvrirOverlay, fermerOverlay, viderErreurs,
   ouvrirFormulaireAjout, ouvrirFormulaireModif
@@ -47,26 +48,21 @@ function soumettreFormulaire() {
 
   let donnees = { nom, prenom, email, indicatif, telephone, role };
   if (id === null) {
-    ajouterEtudiant(donnees);
-    fermerOverlay("overlayForm");
-    afficherTableau(etudiants);
-    afficherToast("✅ Étudiant ajouté avec succès !");
+    ajouterEtudiant(donnees); fermerOverlay("overlayForm");
+    afficherTableau(etudiants); afficherToast("✅ Étudiant ajouté avec succès !");
   } else {
-    // ✅ modifierEtudiant depuis modifier.js
-    modifierEtudiant(id, donnees);
-    fermerOverlay("overlayForm");
-    afficherTableau(etudiants);
-    afficherToast("✅ Étudiant modifié avec succès !");
+    modifierEtudiant(id, donnees); fermerOverlay("overlayForm");
+    afficherTableau(etudiants); afficherToast("✅ Étudiant modifié avec succès !");
   }
 }
 
 function restaurerSelectionnes() {
   let ids = getIdsCoches();
   if (ids.length === 0) return;
+  // ✅ Utilise restaurerEtudiant depuis restaurer.js
   for (let i = 0; i < ids.length; i++) { restaurerEtudiant(ids[i]); }
   confirmBox.style.display = "none";
-  afficherTableau(etudiants);
-  afficherCorbeille();
+  afficherTableau(etudiants); afficherCorbeille();
   afficherToast("↩ Étudiant(s) restauré(s) avec succès !");
 }
 
