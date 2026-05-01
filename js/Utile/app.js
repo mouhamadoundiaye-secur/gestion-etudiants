@@ -1,5 +1,4 @@
 // ===== Utile/app.js — Orchestrateur principal =====
-// C'est ici que tous les modules sont importés et que les événements sont branchés.
 
 import {
   btnNouvelEtudiant, btnFermerForm, btnAnnulerForm, btnSauvegarder,
@@ -12,10 +11,15 @@ import {
 
 import { etudiants, corbeille } from "../Stores/taskStores.js";
 
+// ✅ ajouterEtudiant vient maintenant de son propre fichier (feature/ajouter)
+import { ajouterEtudiant } from "../Services/ajouter.js";
+
 import {
-  ajouterEtudiant, modifierEtudiant,
-  restaurerEtudiant, supprimerDefinitivement,
-  emailExiste, filtrerEtudiants
+  modifierEtudiant,
+  restaurerEtudiant,
+  supprimerDefinitivement,
+  emailExiste,
+  filtrerEtudiants
 } from "../Services/taskService.js";
 
 import { afficherTableau } from "../UI/tasksRenderer.js";
@@ -78,6 +82,7 @@ function soumettreFormulaire() {
   let donnees = { nom, prenom, email, indicatif, telephone, role };
 
   if (id === null) {
+    // ✅ Utilise ajouterEtudiant depuis ajouter.js
     ajouterEtudiant(donnees);
     fermerOverlay("overlayForm");
     afficherTableau(etudiants);
@@ -116,15 +121,12 @@ function toggleTousCheckboxes() {
 // ===== INITIALISATION AU CHARGEMENT DE LA PAGE =====
 document.addEventListener("DOMContentLoaded", function () {
 
-  // Affichage initial du tableau
   afficherTableau(etudiants);
 
-  // Nouveau étudiant → ouvrir popup vide
   btnNouvelEtudiant.addEventListener("click", function () {
     ouvrirFormulaireAjout();
   });
 
-  // Fermer / annuler le popup formulaire
   btnFermerForm.addEventListener("click", function () {
     fermerOverlay("overlayForm");
   });
@@ -133,50 +135,41 @@ document.addEventListener("DOMContentLoaded", function () {
     fermerOverlay("overlayForm");
   });
 
-  // Enregistrer (ajout ou modif)
   btnSauvegarder.addEventListener("click", function () {
     soumettreFormulaire();
   });
 
-  // Ouvrir le drawer corbeille
   btnOuvrirRestore.addEventListener("click", function () {
     afficherCorbeille();
     checkAll.checked = false;
     ouvrirOverlay("overlayRestore");
   });
 
-  // Fermer le drawer
   btnFermerRestore.addEventListener("click", function () {
     fermerOverlay("overlayRestore");
   });
 
-  // Cocher / décocher tout
   checkAll.addEventListener("change", function () {
     toggleTousCheckboxes();
   });
 
-  // Clic sur "Désarchiver" → afficher la boîte de confirmation
   btnDesarchiver.addEventListener("click", function () {
     confirmBox.style.display = "block";
   });
 
-  // Confirmation : "Restaurer"
   btnConfirmRestaurer.addEventListener("click", function () {
     restaurerSelectionnes();
   });
 
-  // Confirmation : "Annuler" → juste cacher la boîte
   btnConfirmAnnuler.addEventListener("click", function () {
     confirmBox.style.display = "none";
   });
 
-  // Recherche en temps réel
   searchInput.addEventListener("input", function () {
     let resultats = filtrerEtudiants(this.value);
     afficherTableau(resultats);
   });
 
-  // Fermer les overlays en cliquant en dehors
   overlayForm.addEventListener("click", function (e) {
     if (e.target === this) fermerOverlay("overlayForm");
   });
