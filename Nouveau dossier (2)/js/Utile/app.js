@@ -114,7 +114,7 @@ function toggleTousCheckboxes() {
 }
 
 // ===== INITIALISATION AU CHARGEMENT DE LA PAGE =====
-document.addEventListener("DOMContentLoaded", function () {
+window.addEventListener("load", function () {
 
   // Affichage initial du tableau
   afficherTableau(etudiants);
@@ -128,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
   btnFermerForm.addEventListener("click", function () {
     fermerOverlay("overlayForm");
   });
-
   btnAnnulerForm.addEventListener("click", function () {
     fermerOverlay("overlayForm");
   });
