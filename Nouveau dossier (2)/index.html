@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>E221 - Administration</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-circle">E<span>221</span></div>
+      <p>ADMINISTRATION</p>
+    </div>
+    <nav>
+      <a href="#" class="nav-link active">
+        <span class="icon">🎓</span> Inscription
+      </a>
+    </nav>
+  </aside>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="main">
+
+    <!-- BARRE DE RECHERCHE + BOUTON AJOUTER -->
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Rechercher..." />
+      </div>
+      <button class="btn-add" id="btnNouvelEtudiant">+ Nouvel étudiant</button>
+    </div>
+
+    <!-- BOUTON RESTAURER -->
+    <div class="restore-bar">
+      <button class="btn-restore" id="btnOuvrirRestore">♻ Restorer</button>
+    </div>
+
+    <!-- MESSAGE DE SUCCÈS -->
+    <div class="toast" id="toast"></div>
+
+    <!-- TABLEAU DES ÉTUDIANTS -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Rempli par JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- POPUP AJOUT / MODIFICATION -->
+  <div class="overlay" id="overlayForm">
+    <div class="popup">
+      <div class="popup-header">
+        <h2 id="popupTitre">Nouvel étudiant</h2>
+        <button class="btn-close" id="btnFermerForm">✕</button>
+      </div>
+      <div class="popup-body">
+        <input type="hidden" id="formId" />
+
+        <div class="form-group">
+          <label>Nom <span class="required">*</span></label>
+          <input type="text" id="formNom" placeholder="Nom de famille" />
+          <span class="error" id="errNom"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Prénom <span class="required">*</span></label>
+          <input type="text" id="formPrenom" placeholder="Prénom" />
+          <span class="error" id="errPrenom"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="formEmail" placeholder="exemple@email.com" />
+          <span class="error" id="errEmail"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone <span class="required">*</span></label>
+          <div class="phone-group">
+            <select id="formIndicatif">
+              <option value="+221">🇸🇳 +221 Sénégal</option>
+              <option value="+220">🇬🇲 +220 Gambie</option>
+              <option value="+224">🇬🇳 +224 Guinée</option>
+              <option value="+223">🇲🇱 +223 Mali</option>
+            </select>
+            <input type="text" id="formTelephone" placeholder="77 000 00 00" />
+          </div>
+          <span class="error" id="errTel"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Formation / Rôle <span class="required">*</span></label>
+          <select id="formRole">
+            <option value="">-- Choisir une formation --</option>
+            <option value="Design">Design Graphique</option>
+            <option value="Marketing">Marketing Digital</option>
+            <option value="Informatique">Informatique</option>
+            <option value="Comptabilité">Comptabilité</option>
+            <option value="Management">Management</option>
+            <option value="Communication">Communication</option>
+          </select>
+          <span class="error" id="errRole"></span>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" id="btnAnnulerForm">Annuler</button>
+        <button class="btn-save" id="btnSauvegarder">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER RESTAURATION -->
+  <div class="overlay" id="overlayRestore">
+    <div class="drawer">
+      <div class="drawer-header">
+        <h2>🗑 Étudiants supprimés</h2>
+        <button class="btn-close" id="btnFermerRestore">✕</button>
+      </div>
+      <div class="drawer-body">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="checkAll" /></th>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Email</th>
+              <th>Rôle</th>
+            </tr>
+          </thead>
+          <tbody id="restoreBody">
+            <!-- Rempli par JS -->
+          </tbody>
+        </table>
+        <!-- Bouton désarchiver — visible quand au moins une checkbox est cochée -->
+        <div class="drawer-actions" id="drawerActions" style="display:none;">
+          <button class="btn-desarchiver" id="btnDesarchiver">&#x21A9; Désarchiver</button>
+        </div>
+
+        <!-- Mini popup de confirmation désarchivage -->
+        <div class="confirm-box" id="confirmBox" style="display:none;">
+          <p class="confirm-text">Voulez-vous restaurer les étudiants sélectionnés ?</p>
+          <div class="confirm-btns">
+            <button class="btn-confirm-restaurer" id="btnConfirmRestaurer">&#x2714; Restaurer</button>
+            <button class="btn-confirm-annuler"   id="btnConfirmAnnuler">&#x2715; Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Un seul script, type="module" — app.js orchestre tout -->
+  <script type="module" src="js/Utile/app.js"></script>
+
+</body>
+</html>
